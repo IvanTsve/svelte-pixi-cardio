@@ -10,11 +10,10 @@
 
     let container;
     let app;
-    let running = {
-        run1: null,
-        run2: null,
-        run3: null,
-    }
+    let isRunning = false;
+    let frame = 0;
+    let frameTicker;
+    let textures = [];
 
     onMount(() => {
         console.log('the component has mounted');
@@ -23,17 +22,60 @@
             resizeTo: window,
         });
         container.appendChild(app.view);
-
-        const textures = [
+        textures.push(
             PIXI.Texture.from(run1),
             PIXI.Texture.from(run2),
             PIXI.Texture.from(run3),
-        ];
+        );
 
-        const run1Sprite = new PIXI.Sprite(textures[0]);
-        app.stage.addChild(run1Sprite);
-        
+        const hero = new PIXI.Sprite(textures[1]);
+        app.stage.addChild(hero);
+
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyD') {
+                handleRight(hero);
+            } 
+            if (e.code === 'KeyA') {
+                handleLeft(hero);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyD' || e.code === 'KeyA') {
+                stopWalk(hero);
+            }
+        });
 
     });
+    function handleRight(hero) {
+        hero.scale.x = 1;
+        hero.anchor.x = 0;
+        hero.x += 25; 
+        loopWalk(hero);
+    }
+    function handleLeft(hero) {
+        hero.scale.x = -1;
+        hero.anchor.x = 1;
+        hero.x -= 25; 
+        loopWalk(hero);
+    }
+
+    function loopWalk(hero) {
+        if (isRunning) return; 
+        isRunning = true;
+
+        frameTicker = setInterval(() => {
+            frame = (frame + 1) % textures.length;
+            hero.texture = textures[frame];
+        }, 200);
+    }
+
+    function stopWalk(hero) {
+        isRunning = false;
+        clearInterval(frameTicker);
+        hero.texture = textures[0];
+    }
+
 
 </script>
